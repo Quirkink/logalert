@@ -22,6 +22,7 @@ from ..types import Alert
 
 _log = logging.getLogger('logalert.debug')
 
+
 @runtime_checkable
 class Sink(Protocol):
     """

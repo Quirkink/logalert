@@ -244,8 +244,6 @@ class FileSink:
 
     def close(self) -> None:
         return None
-
-
 ```
 
 ```python
