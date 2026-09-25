@@ -1,0 +1,14 @@
+# Redis for the live tests and for running the worker locally.
+# Only needed when working on the durable queue - the library itself works
+# without it.
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
