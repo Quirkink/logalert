@@ -6,6 +6,7 @@ Capture: hooks, filtering, and above all the absence of an amplification loop.
 :copyright: (c) 2025 Aiko Sora
 """
 
+import asyncio
 import logging
 import sys
 import threading
@@ -428,12 +429,54 @@ class TestExcepthook:
         assert sink.sent[0].handled is False
 
 
+class TestLoopHook:
+    """
+    The asyncio hook: what the loop catches on its own reaches the sink
+
+    This path had no test at all, and that is how a ``NameError`` in the handler's
+    annotation survived: the annotation was evaluated the moment ``install_loop_hooks``
+    ran, ``asyncio`` was imported for the type checker only, and so ``logalert.init()``
+    raised inside a running loop. Every ASGI application starts exactly that way, which
+    made the library unusable under uvicorn while the whole suite stayed green.
+    """
+
+    async def test_a_raising_callback_reaches_the_sink(self, sink: RecordingSink) -> None:
+        """
+        Installing inside a running loop works, and a failing callback is captured
+        """
+
+        client = logalert.Client(logalert.Options(sinks=[sink], dedup_window=0))
+        handle = logalert.install_hooks(client, client.options)
+
+        try:
+            loop = asyncio.get_running_loop()
+
+            def boom() -> None:
+                raise DbTimeout('the callback blew up')
+
+            loop.call_soon(boom)
+
+            for _ in range(10):
+                await asyncio.sleep(0.05)
+                client.flush(0.2)
+
+        finally:
+            handle.uninstall()
+            client.close()
+
+        # Checking that the loop handed the exception to the sink, marked as asyncio
+        assert len(sink.sent) == 1, 'the loop hook captured nothing'
+        assert sink.sent[0].source == 'asyncio'
+        assert sink.sent[0].mechanism == 'asyncio'
+
+
 __all__ = (
     'TestHandlerRobustness',
     'TestNoAmplification',
     'TestReentrancyGuard',
     'TestOriginDenylist',
     'TestIgnoreRules',
+    'TestLoopHook',
     'TestExcepthook',
     'DbTimeout',
 )

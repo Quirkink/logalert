@@ -7,9 +7,6 @@ someone's code.
 :copyright: (c) 2025 Aiko Sora
 """
 
-import re
-from pathlib import Path
-
 import pytest
 
 import logalert
@@ -99,16 +96,19 @@ def test_public_names_are_documented() -> None:
     assert not undocumented
 
 
-def test_version_matches_pyproject() -> None:
+def test_version_agrees_with_the_installed_metadata() -> None:
     """
-    The version is declared twice, and the two declarations have to match
+    ``__version__`` and the version the package was built under are the same
+
+    Both are derived from the tag, so normally they cannot drift. They can when a
+    hand-written ``_version.py`` survives in the tree and shadows the generated one -
+    the package then reports what it was built as, while ``__version__`` insists on
+    whatever the stale file says, and nothing else notices.
     """
 
-    pyproject = Path(__file__).resolve().parent.parent / 'pyproject.toml'
-    match = re.search(r'^version = "([^"]+)"', pyproject.read_text(), re.MULTILINE)
+    from importlib.metadata import version as installed_version
 
-    assert match is not None
-    assert match.group(1) == logalert.__version__
+    assert logalert.__version__ == installed_version('logalert')
 
 
 class TestSinkSelection:

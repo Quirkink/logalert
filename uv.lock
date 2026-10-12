@@ -969,7 +969,6 @@ wheels = [
 
 [[package]]
 name = "logalert"
-version = "0.1.0"
 source = { editable = "." }
 
 [package.optional-dependencies]
@@ -1023,7 +1022,7 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.8" },
     { name = "twine", marker = "extra == 'dev'" },
 ]
-provides-extras = ["telegram", "matrix", "redis", "matrix-e2ee", "all", "dev"]
+provides-extras = ["all", "dev", "matrix", "matrix-e2ee", "redis", "telegram"]
 
 [[package]]
 name = "markdown-it-py"

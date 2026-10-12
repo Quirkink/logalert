@@ -13,7 +13,15 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@v5
       - run: uv build
       - run: uvx twine check dist/*
+      - name: Check the built version matches the tag
+        run: |
+          built=$(uv run --no-project python -c 'import glob,re,zipfile; a=zipfile.ZipFile(glob.glob("dist/*.whl")[0]); n=next(x for x in a.namelist() if x.endswith("METADATA")); print(re.search(r"^Version: (.+)$", a.read(n).decode(), re.M).group(1))')
+          tagged="${GITHUB_REF_NAME#v}"
+          echo "built=$built tagged=$tagged"
+          test "$built" = "$tagged"
       - uses: pypa/gh-action-pypi-publish@release/v1

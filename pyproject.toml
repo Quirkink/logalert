@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling>=1.27"]
+requires = ["hatchling>=1.27", "hatch-vcs>=0.4"]
 build-backend = "hatchling.build"
 
 [project]
 name = "logalert"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Capture Python errors and deliver them to Telegram or Matrix, with an optional Redis-backed durable queue"
 authors = [
     {name = "Aiko Sora", email = "altairteam@bk.ru"}
@@ -68,6 +68,12 @@ logalert = "logalert.cli:main"
 Homepage = "https://github.com/Quirkink/logalert"
 Repository = "https://github.com/Quirkink/logalert"
 Issues = "https://github.com/Quirkink/logalert/issues"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/logalert/_version.py"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/logalert"]

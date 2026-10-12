@@ -579,7 +579,7 @@ def install_loop_hooks(
 
     previous_handler = loop.get_exception_handler()
 
-    def handler(loop_: asyncio.AbstractEventLoop, context: dict[str, Any]) -> None:
+    def handler(loop_: 'asyncio.AbstractEventLoop', context: dict[str, Any]) -> None:
         exc = context.get('exception')
 
         if isinstance(exc, BaseException):
